@@ -1,0 +1,63 @@
+[gd_scene load_steps=3 format=3 uid="uid://dt7nrkcdln8a8"]
+
+[ext_resource type="Texture2D" uid="uid://bmce5in4pu4ai" path="res://content/graphics/icon.png" id="1_gc0x1"]
+[ext_resource type="Script" path="res://content/scripts/HostMenu.gd" id="1_ia5f0"]
+
+[node name="HostMenu" type="Node2D"]
+script = ExtResource("1_ia5f0")
+
+[node name="Logo" type="TextureRect" parent="."]
+texture_filter = 1
+offset_left = 592.0
+offset_top = 128.0
+offset_right = 1012.0
+offset_bottom = 548.0
+texture = ExtResource("1_gc0x1")
+
+[node name="HostLabel" type="Label" parent="."]
+offset_left = 616.0
+offset_top = 392.0
+offset_right = 994.0
+offset_bottom = 495.0
+rotation = -0.523599
+theme_override_font_sizes/font_size = 100
+text = "Host Game"
+metadata/_edit_use_anchors_ = true
+
+[node name="StartServerButton" type="Button" parent="."]
+texture_filter = 1
+offset_left = 704.0
+offset_top = 640.0
+offset_right = 896.0
+offset_bottom = 688.0
+theme_override_font_sizes/font_size = 35
+text = "Launch"
+
+[node name="ServerNameTextBox" type="TextEdit" parent="."]
+texture_filter = 1
+offset_left = 768.0
+offset_top = 557.0
+offset_right = 1024.0
+offset_bottom = 605.0
+theme_override_font_sizes/font_size = 35
+
+[node name="ServerNameLabel" type="Label" parent="."]
+texture_filter = 1
+offset_left = 576.0
+offset_top = 565.0
+offset_right = 756.0
+offset_bottom = 604.0
+theme_override_font_sizes/font_size = 35
+text = "Server name:"
+
+[node name="BackButton" type="Button" parent="."]
+texture_filter = 1
+offset_left = 704.0
+offset_top = 704.0
+offset_right = 896.0
+offset_bottom = 752.0
+theme_override_font_sizes/font_size = 35
+text = "Back"
+
+[connection signal="pressed" from="StartServerButton" to="." method="_on_ServerStartButton_pressed"]
+[connection signal="pressed" from="BackButton" to="." method="_on_BackButton_pressed"]

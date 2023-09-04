@@ -1,0 +1,80 @@
+[gd_scene load_steps=3 format=3 uid="uid://c84i3dk2h5jay"]
+
+[ext_resource type="Script" path="res://content/scripts/JoinMenu.gd" id="1_o8mp1"]
+[ext_resource type="Texture2D" uid="uid://bmce5in4pu4ai" path="res://content/graphics/icon.png" id="2_mu5t2"]
+
+[node name="JoinMenu" type="Node2D"]
+script = ExtResource("1_o8mp1")
+
+[node name="Logo" type="TextureRect" parent="."]
+texture_filter = 1
+offset_left = 592.0
+offset_top = 128.0
+offset_right = 1012.0
+offset_bottom = 548.0
+texture = ExtResource("2_mu5t2")
+
+[node name="JoinLabel" type="Label" parent="."]
+offset_left = 616.0
+offset_top = 392.0
+offset_right = 994.0
+offset_bottom = 495.0
+rotation = -0.523599
+theme_override_font_sizes/font_size = 100
+text = "Join Game"
+metadata/_edit_use_anchors_ = true
+
+[node name="JoinServerButton" type="Button" parent="."]
+texture_filter = 1
+offset_left = 832.0
+offset_top = 704.0
+offset_right = 1024.0
+offset_bottom = 752.0
+theme_override_font_sizes/font_size = 35
+text = "Join"
+
+[node name="PlayerNameTextBox" type="TextEdit" parent="."]
+texture_filter = 1
+offset_left = 768.0
+offset_top = 557.0
+offset_right = 1024.0
+offset_bottom = 605.0
+theme_override_font_sizes/font_size = 35
+
+[node name="PlayerNameLabel" type="Label" parent="."]
+texture_filter = 1
+offset_left = 576.0
+offset_top = 565.0
+offset_right = 756.0
+offset_bottom = 604.0
+theme_override_font_sizes/font_size = 35
+text = "Player name:"
+
+[node name="BackButton" type="Button" parent="."]
+texture_filter = 1
+offset_left = 576.0
+offset_top = 704.0
+offset_right = 768.0
+offset_bottom = 752.0
+theme_override_font_sizes/font_size = 35
+text = "Back"
+
+[node name="ServerPathLabel" type="Label" parent="."]
+texture_filter = 1
+offset_left = 576.0
+offset_top = 632.0
+offset_right = 756.0
+offset_bottom = 671.0
+theme_override_font_sizes/font_size = 35
+text = "Server:"
+
+[node name="ServerPathTextBox" type="TextEdit" parent="."]
+texture_filter = 1
+offset_left = 768.0
+offset_top = 624.0
+offset_right = 1024.0
+offset_bottom = 672.0
+theme_override_font_sizes/font_size = 35
+
+[connection signal="pressed" from="JoinServerButton" to="." method="_on_JoinButton_pressed"]
+[connection signal="pressed" from="BackButton" to="." method="_on_BackButton_pressed"]

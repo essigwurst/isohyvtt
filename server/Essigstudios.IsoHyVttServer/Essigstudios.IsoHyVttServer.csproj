@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Authors>Essigstudios Austria; Kaiser A.</Authors>
+    <Company>Essigstudios Austria</Company>
+    <PackageOutputPath>bin</PackageOutputPath>
+    <StartupObject>Essigstudios.IsoHyVttServer.Core</StartupObject>
+    <AssemblyName>serverexec</AssemblyName>
+    <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+    <IsPublishable>False</IsPublishable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy &quot;E:\Entwicklung\Godot\IsoHyVtt\server\Essigstudios.IsoHyVttServer\bin\Debug\net7.0\serverexec.*&quot; &quot;E:\Entwicklung\Godot\IsoHyVtt\server\bin\serverexec.*&quot;" />
+  </Target>
+
+</Project>

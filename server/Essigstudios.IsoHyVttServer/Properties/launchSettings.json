@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Essigstudios.IsoHyVttServer": {
+      "commandName": "Project",
+      "commandLineArgs": "demo"
+    }
+  }
+}

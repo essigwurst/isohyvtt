@@ -1,0 +1,6 @@
+**/server/bin
+**/server/Essigstudios.IsoHyVttServer/bin
+**/server/Essigstudios.IsoHyVttServer/obj
+**/server/Essigstudios.IsoHyVttServer/.vs
+**/.godot/shader_cache
+**/.godot

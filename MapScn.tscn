@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://bnob3b18e6rmq"]
+
+[ext_resource type="Script" path="res://content/scripts/MapScn.gd" id="1_44dho"]
+
+[node name="MapScn" type="Node2D"]
+z_index = 50
+z_as_relative = false
+script = ExtResource("1_44dho")

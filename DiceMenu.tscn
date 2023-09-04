@@ -1,0 +1,67 @@
+[gd_scene load_steps=2 format=3 uid="uid://bpgtke26ub8cm"]
+
+[ext_resource type="Script" path="res://content/scripts/DiceMenu.gd" id="1_4ikb5"]
+
+[node name="DiceMenu" type="Node2D"]
+script = ExtResource("1_4ikb5")
+
+[node name="DicePanel" type="Panel" parent="."]
+texture_filter = 1
+offset_right = 256.0
+offset_bottom = 72.0
+
+[node name="ButtonD4" type="Button" parent="DicePanel"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 56.0
+offset_bottom = 32.0
+text = "D4"
+
+[node name="ButtonD6" type="Button" parent="DicePanel"]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 8.0
+offset_right = 120.0
+offset_bottom = 32.0
+text = "D6"
+
+[node name="ButtonD8" type="Button" parent="DicePanel"]
+layout_mode = 0
+offset_left = 136.0
+offset_top = 8.0
+offset_right = 184.0
+offset_bottom = 32.0
+text = "D8"
+
+[node name="ButtonD10" type="Button" parent="DicePanel"]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 8.0
+offset_right = 248.0
+offset_bottom = 32.0
+text = "D10"
+
+[node name="ButtonD12" type="Button" parent="DicePanel"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 40.0
+offset_right = 88.0
+offset_bottom = 64.0
+text = "D12"
+
+[node name="ButtonD20" type="Button" parent="DicePanel"]
+layout_mode = 0
+offset_left = 104.0
+offset_top = 40.0
+offset_right = 152.0
+offset_bottom = 64.0
+text = "D20"
+
+[node name="ButtonD100" type="Button" parent="DicePanel"]
+layout_mode = 0
+offset_left = 168.0
+offset_top = 40.0
+offset_right = 216.0
+offset_bottom = 64.0
+text = "D100"

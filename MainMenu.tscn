@@ -1,0 +1,72 @@
+[gd_scene load_steps=6 format=3 uid="uid://cvc8mvlxjphwu"]
+
+[ext_resource type="Script" path="res://content/scripts/MainMenu.gd" id="1_b7mej"]
+[ext_resource type="FontFile" uid="uid://b3026fpukqwge" path="res://content/fonts/Flexi_IBM_VGA_True_437.ttf" id="1_pb23i"]
+[ext_resource type="Texture2D" uid="uid://bmce5in4pu4ai" path="res://content/graphics/icon.png" id="2_6xqyv"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_s84va"]
+font = ExtResource("1_pb23i")
+font_size = 20
+
+[sub_resource type="LabelSettings" id="LabelSettings_nb3se"]
+font = ExtResource("1_pb23i")
+font_size = 20
+
+[node name="MainMenu" type="Node2D"]
+script = ExtResource("1_b7mej")
+
+[node name="VersionLabel" type="Label" parent="."]
+offset_left = 21.0
+offset_top = 858.0
+offset_right = 61.0
+offset_bottom = 881.0
+text = "v1.0"
+label_settings = SubResource("LabelSettings_s84va")
+metadata/_edit_use_anchors_ = true
+
+[node name="CopyrightLabel" type="Label" parent="."]
+offset_left = 1287.0
+offset_top = 858.0
+offset_right = 1574.0
+offset_bottom = 881.0
+text = "(C)2023 Kaiser A. [Build 04092023]"
+label_settings = SubResource("LabelSettings_nb3se")
+
+[node name="HostButton" type="Button" parent="."]
+texture_filter = 1
+offset_left = 704.0
+offset_top = 592.0
+offset_right = 896.0
+offset_bottom = 640.0
+theme_override_font_sizes/font_size = 35
+text = "Host Game"
+
+[node name="JoinButton" type="Button" parent="."]
+texture_filter = 1
+offset_left = 704.0
+offset_top = 656.0
+offset_right = 896.0
+offset_bottom = 704.0
+theme_override_font_sizes/font_size = 35
+text = "Join Game"
+
+[node name="ExitButton" type="Button" parent="."]
+texture_filter = 1
+offset_left = 704.0
+offset_top = 720.0
+offset_right = 896.0
+offset_bottom = 768.0
+theme_override_font_sizes/font_size = 35
+text = "Exit Game"
+
+[node name="Logo" type="TextureRect" parent="."]
+texture_filter = 1
+offset_left = 592.0
+offset_top = 128.0
+offset_right = 1012.0
+offset_bottom = 548.0
+texture = ExtResource("2_6xqyv")
+
+[connection signal="pressed" from="HostButton" to="." method="_on_HostButton_pressed"]
+[connection signal="pressed" from="JoinButton" to="." method="_on_JoinButton_pressed"]
+[connection signal="pressed" from="ExitButton" to="." method="_on_ExitButton_pressed"]

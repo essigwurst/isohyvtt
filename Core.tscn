@@ -1,0 +1,51 @@
+[gd_scene load_steps=7 format=3 uid="uid://ccu30jefsebug"]
+
+[ext_resource type="PackedScene" uid="uid://cvc8mvlxjphwu" path="res://MainMenu.tscn" id="1_15alo"]
+[ext_resource type="Script" path="res://content/scripts/Core.gd" id="1_i2gum"]
+[ext_resource type="PackedScene" uid="uid://dt7nrkcdln8a8" path="res://HostMenu.tscn" id="2_3v8n4"]
+[ext_resource type="PackedScene" uid="uid://c84i3dk2h5jay" path="res://JoinMenu.tscn" id="3_no2ea"]
+[ext_resource type="PackedScene" uid="uid://njsujtljoo5q" path="res://GameHUD.tscn" id="5_5u8ls"]
+[ext_resource type="PackedScene" uid="uid://bnob3b18e6rmq" path="res://MapScn.tscn" id="6_njr5n"]
+
+[node name="Core" type="Node"]
+script = ExtResource("1_i2gum")
+
+[node name="MainMenu" parent="." instance=ExtResource("1_15alo")]
+metadata/_edit_group_ = true
+
+[node name="HostMenu" parent="." instance=ExtResource("2_3v8n4")]
+visible = false
+metadata/_edit_group_ = true
+
+[node name="JoinMenu" parent="." instance=ExtResource("3_no2ea")]
+visible = false
+metadata/_edit_group_ = true
+
+[node name="GameHUD" parent="." instance=ExtResource("5_5u8ls")]
+visible = false
+top_level = true
+metadata/_edit_group_ = true
+
+[node name="MapScn" parent="." instance=ExtResource("6_njr5n")]
+metadata/_edit_group_ = true
+
+[node name="ServerConnector" type="HTTPRequest" parent="."]
+
+[node name="SyncTimer" type="Timer" parent="."]
+wait_time = 0.333
+
+[connection signal="host_menu" from="MainMenu" to="." method="_on_HostMenuClick"]
+[connection signal="join_menu" from="MainMenu" to="." method="_on_JoinMenuClick"]
+[connection signal="main_menu" from="HostMenu" to="." method="_on_ShowMainMenuClick"]
+[connection signal="start_server" from="HostMenu" to="." method="_on_ServerStart"]
+[connection signal="join_game" from="JoinMenu" to="." method="_on_JoinGame"]
+[connection signal="main_menu" from="JoinMenu" to="." method="_on_ShowMainMenuClick"]
+[connection signal="leave_game" from="GameHUD" to="." method="_on_LeaveGame"]
+[connection signal="roll_dice_tunnel" from="GameHUD" to="." method="_on_RollDiceOnServer"]
+[connection signal="spawn_asset" from="GameHUD" to="." method="_on_SpawnNewAsset"]
+[connection signal="upload_assets" from="GameHUD" to="." method="_on_UploadAssets"]
+[connection signal="write_chat_message" from="GameHUD" to="." method="_on_WriteChat"]
+[connection signal="RemoveGameElement" from="MapScn" to="." method="_on_RemoveElementFromServer"]
+[connection signal="UpdateLocationFromClient" from="MapScn" to="." method="_on_UpdateLocationFromClient"]
+[connection signal="UpdateSizeFromClient" from="MapScn" to="." method="_on_UpdateSizeFromClient"]
+[connection signal="timeout" from="SyncTimer" to="." method="_do_Sync"]
