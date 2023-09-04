@@ -1,6 +1,22 @@
-﻿// (C)2023 Essigstudios Austria, Kaiser A.
+﻿/* ------------------------------------------------------------------------
+ * Copyright 2023 Essigstudios Austria / Kaiser A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * --------------------------------------------------------------------- */
+
+#pragma warning disable 8600
 #pragma warning disable 8602
+#pragma warning disable 8604
 #pragma warning disable 8618
 
 using System;
@@ -17,8 +33,16 @@ using Newtonsoft.Json;
 
 namespace Essigstudios.IsoHyVttServer
 {
+    /// <summary>
+    /// Base GameServer class
+    /// </summary>
     public class GameServer
     {
+        /// <summary>
+        /// Creates a new instance of the <see cref="GameServer"/> class.
+        /// Multiple instances may run on the same machine. Modify the constant LISTEN_PORT for this.
+        /// </summary>
+        /// <param name="serverName">Target instance name of this server</param>
         public GameServer(string serverName)
         {
             m_WebRoot = Environment.CurrentDirectory;
@@ -31,7 +55,7 @@ namespace Essigstudios.IsoHyVttServer
             {
                 m_HttpListener.Start();
             }
-            catch (HttpListenerException ex)
+            catch (HttpListenerException)
             {
                 Console.WriteLine($"[Error]\tAdmin rights required - unable to start server! Press any key to exit!");
                 Console.ReadKey(true);
@@ -53,6 +77,9 @@ namespace Essigstudios.IsoHyVttServer
         private HttpListener m_HttpListener;
 
 
+        /// <summary>
+        /// Returns true, if the server thread is running. Otherwise returns false.
+        /// </summary>
         public bool IsAlive
         {
             get
@@ -67,6 +94,9 @@ namespace Essigstudios.IsoHyVttServer
         }
 
 
+        /// <summary>
+        /// Creates a new server instance (if it doesn't exist) and starts the Http listener.
+        /// </summary>
         public void RunLoop()
         {
             Console.WriteLine($"[Info]\tHttp listener running!");
@@ -102,11 +132,8 @@ namespace Essigstudios.IsoHyVttServer
                             $"<body>" +
                             $"Server time is {DateTime.Now.ToString("HH:mm:ss.ffff")}<br>" +
                             $"Prefixes: {string.Join("<br>", m_HttpListener.Prefixes)}" +
-                            $"<br>";
-
-                        // List sessions
-
-                        responseString += $"</body></html>";
+                            $"<br>" +
+                            $"</body></html>";
 
                         responseData = Encoding.UTF8.GetBytes(responseString);
                     }
@@ -191,7 +218,7 @@ namespace Essigstudios.IsoHyVttServer
 
                         string assetName = requirement[0];
 
-                        RemoveGameElement(assetName, user);
+                        RemoveGameElement(assetName);
 
                         responseData = Encoding.UTF8.GetBytes("200");
                     }
@@ -216,6 +243,7 @@ namespace Essigstudios.IsoHyVttServer
                         string assetIdentifier = requirement[0];
                         int newSizeX = Convert.ToInt32(requirement[1].Replace(".", ",").Split(',')[0]);
                         int newSizeY = Convert.ToInt32(requirement[2].Replace(".", ",").Split(',')[0]);
+
                         UpdateGameElementSize(assetIdentifier, newSizeX, newSizeY);
 
                         responseData = Encoding.UTF8.GetBytes("200");
@@ -257,6 +285,11 @@ namespace Essigstudios.IsoHyVttServer
         }
 
 
+        /// <summary>
+        /// Converts the request body stream into a byte array
+        /// </summary>
+        /// <param name="input">Stream</param>
+        /// <returns>Request body data</returns>
         public static byte[] ReadFullStream(Stream input)
         {
             byte[] buffer = new byte[16 * 1024];
@@ -274,6 +307,12 @@ namespace Essigstudios.IsoHyVttServer
         }
 
 
+        /// <summary>
+        /// Updates the location (e.g. position) of a game element from a client request
+        /// </summary>
+        /// <param name="assetIdentifier">Asset identifier, e.g. test_png1</param>
+        /// <param name="newPosX">Target position, X</param>
+        /// <param name="newPosY">Target position, Y</param>
         private void UpdateGameElementLocation(string assetIdentifier, int newPosX, int newPosY)
         {
             foreach (var gameElement in m_Session.GameElements)
@@ -289,6 +328,12 @@ namespace Essigstudios.IsoHyVttServer
         }
 
 
+        /// <summary>
+        /// Updates the size of an asset from a client request
+        /// </summary>
+        /// <param name="assetIdentifier">Asset identifier, e.g. test_png1</param>
+        /// <param name="newSizeX">Target size, X</param>
+        /// <param name="newSizeY">Target size, Y</param>
         private void UpdateGameElementSize(string assetIdentifier, int newSizeX, int newSizeY)
         {
             foreach (var gameElement in m_Session.GameElements)
@@ -304,7 +349,11 @@ namespace Essigstudios.IsoHyVttServer
         }
 
 
-        private void RemoveGameElement(string assetName, string owner)
+        /// <summary>
+        /// Removes an element from the game by a client request
+        /// </summary>
+        /// <param name="assetName">Asset identifier, e.g. test_png1</param>
+        private void RemoveGameElement(string assetName)
         {
             foreach (var gameElement in m_Session.GameElements)
             {
@@ -314,20 +363,28 @@ namespace Essigstudios.IsoHyVttServer
 
                     GenerateGameElementHash();
 
-                    Console.WriteLine($"[Info] Removed game element {assetName}!");
+                    Console.WriteLine($"[Info]\tRemoved game element {assetName}!");
                     break;
                 }
             }
         }
 
 
+        /// <summary>
+        /// Adds a new element to the game by a client request
+        /// </summary>
+        /// <param name="assetName">Asset name, e.g. test.png</param>
+        /// <param name="owner">User, who spawns and owns the asset</param>
+        /// <param name="windowX">Viewport width, used to determine the spawn position (center screen)</param>
+        /// <param name="windowY">Viewport height, used to determine the spawn position (center screen)</param>
+        /// <returns>Asset identifier, e.g. test_png1</returns>
         private string AddGameElement(string assetName, string owner, int windowX, int windowY)
         {
             var asset = Path.Combine(m_WebRoot, m_ServerName, assetName);
 
             if (!File.Exists(asset))
             {
-                Console.WriteLine($"[Error] Unable to spawn asset {asset} because it does not exist!");
+                Console.WriteLine($"[Error]\tUnable to spawn asset {asset} because it does not exist!");
                 return (string.Empty);
             }
 
@@ -337,6 +394,7 @@ namespace Essigstudios.IsoHyVttServer
                 windowY / 2.0f
             };
 
+            // ToDo: Make it cross- platform compatible.
             var image = Image.FromFile(asset);
 
             int highestId = 0;
@@ -363,12 +421,18 @@ namespace Essigstudios.IsoHyVttServer
 
             GenerateGameElementHash();
 
-            Console.WriteLine($"[Info] Spawned asset: {assetName} ({identifier})!");
+            Console.WriteLine($"[Info]\tSpawned asset: {assetName} ({identifier})!");
 
             return (identifier);
         }
 
 
+        /// <summary>
+        /// Creates the asset on the server, as received in bytes from a client
+        /// </summary>
+        /// <param name="instancePath">Instance name, specifies where to store the asset</param>
+        /// <param name="filePath">Target file path</param>
+        /// <param name="fileContent">Fily bytes</param>
         private void WriteAsset(string instancePath, string filePath, byte[] fileContent)
         {
             if (!Directory.Exists(instancePath))
@@ -390,6 +454,10 @@ namespace Essigstudios.IsoHyVttServer
         }
 
 
+        /// <summary>
+        /// Writes text to the game chat log
+        /// </summary>
+        /// <param name="text">Text, which should be written</param>
         private void WriteToChatLog(string text)
         {
             m_Session.ChatWindowLog.Add(text);
@@ -399,6 +467,10 @@ namespace Essigstudios.IsoHyVttServer
         }
 
 
+        /// <summary>
+        /// Generates a hash out of all uploaded assets.
+        /// Used by the client to determine, if anything has been changed
+        /// </summary>
         private void GenerateAssetHash()
         {
             string buffer = string.Empty;
@@ -415,6 +487,10 @@ namespace Essigstudios.IsoHyVttServer
         }
 
 
+        /// <summary>
+        /// Generates a hash out of all active game elements.
+        /// Used by the client to determine, if anything has been changed
+        /// </summary>
         private void GenerateGameElementHash()
         {
             string buffer = string.Empty;
@@ -431,6 +507,11 @@ namespace Essigstudios.IsoHyVttServer
         }
 
 
+        /// <summary>
+        /// Adds the identification of a player to the session.
+        /// Not used for anything specific right now
+        /// </summary>
+        /// <param name="user">Name of the new player with the according IP</param>
         private void CheckAddPlayerToSession(string user)
         {
             if (!m_Session.PlayerList.Contains(user))
@@ -440,6 +521,9 @@ namespace Essigstudios.IsoHyVttServer
         }
 
 
+        /// <summary>
+        /// Creates a new session on the server (or loads it, if there are existing assets).
+        /// </summary>
         public void CreateSession()
         {
             Console.WriteLine($"[Info]\tGenerating new session '{m_ServerName}'  . . .");
