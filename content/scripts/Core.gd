@@ -344,8 +344,13 @@ func _on_ServerStart(serverName):
 		return
 
 	# ToDo: Check, if path is valid when this program is compiled
-	var applicationPath = OS.get_executable_path()
-	var serverexec = applicationPath + "/server/bin/serverexec.exe"
+	var applicationPath = OS.get_executable_path().split('/')
+	var executingDir = ""
+	
+	for i in range(0, applicationPath.size() - 1):
+		executingDir += applicationPath[i] + "/"
+	
+	var serverexec = executingDir + "server/serverexec.exe"
 	
 	if (FileAccess.file_exists(serverexec)):
 		
@@ -353,7 +358,7 @@ func _on_ServerStart(serverName):
 		
 	else:
 		
-		ShowInternalMessage("Error: Failed to start server - no serverexec available!", $MainMenu)
+		ShowInternalMessage("Error: Failed to start server - executable not found: " + serverexec, $MainMenu)
 
 	pass
 
