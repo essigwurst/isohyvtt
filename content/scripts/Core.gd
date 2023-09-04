@@ -110,19 +110,19 @@ func ShowInternalMessage(message, retToHandle):
 	var messageScn = preload("res://MessageScn.tscn").instantiate()
 	add_child(messageScn)
 	messageScn.ShowMessage(message, retToHandle)
-
+	
 	pass
 
 
 func _on_LeaveGame():
 	
-	# Actually either don't, or instantly reinstanciate -> else error on rejoin
-	$MapScn.queue_free()
+	$SyncTimer.stop()
 	
+	GameSession = null
+	
+	$MapScn.PerformCleanup()
 	$GameHUD.hide()
 	$MainMenu.show()
-	
-	# send bye server msg
 	
 	pass
 
@@ -343,9 +343,9 @@ func _on_ServerStart(serverName):
 		
 		return
 
-	# Run serverexec
-	# ToDo: Get relative path of target executable
-	var serverexec = "E:\\Entwicklung\\Godot\\IsoHyVtt\\server\\bin\\serverexec.exe"
+	# ToDo: Check, if path is valid when this program is compiled
+	var applicationPath = OS.get_executable_path()
+	var serverexec = applicationPath + "/server/bin/serverexec.exe"
 	
 	if (FileAccess.file_exists(serverexec)):
 		

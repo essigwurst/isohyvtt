@@ -322,6 +322,8 @@ namespace Essigstudios.IsoHyVttServer
                     gameElement.Location[0] = newPosX;
                     gameElement.Location[1] = newPosY;
 
+                    GenerateGameElementHash();
+
                     break;
                 }
             }
@@ -342,6 +344,8 @@ namespace Essigstudios.IsoHyVttServer
                 {
                     gameElement.Size[0] = newSizeX;
                     gameElement.Size[1] = newSizeY;
+
+                    GenerateGameElementHash();
 
                     break;
                 }
