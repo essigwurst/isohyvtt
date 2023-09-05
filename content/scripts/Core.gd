@@ -1,4 +1,18 @@
-# (C)2023 Essigstudios Austria, All rights reserved.
+# ------------------------------------------------------------------------
+# Copyright 2023 Essigstudios Austria / Kaiser A.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ------------------------------------------------------------------------
 
 extends Node
 
@@ -36,6 +50,16 @@ func _on_RollDiceOnServer(value):
 	pass
 
 
+# Instructs the server to print information about an selected object
+func _on_PrintInformation(gameElementNode):
+	
+	var url = m_ServerPath + "/printinfo?user='" + m_PlayerName + "'"
+	AddToRequestQueue(url, HTTPClient.METHOD_POST, gameElementNode.name)
+		
+	pass
+
+
+# Reports to the server, that a specific asset should be removed
 func _on_RemoveElementFromServer(gameElementTexNode):
 	
 	var url = m_ServerPath + "/removeasset?user='" + m_PlayerName + "'"
@@ -59,7 +83,7 @@ func _on_UpdateLocationFromClient(gameElement):
 func _on_UpdateSizeFromClient(gameElement):
 	
 	var url = m_ServerPath + "/updateassetsize?user='" + m_PlayerName + "'"
-	var requirement = gameElement.name + "\t" + str(gameElement.size.x) + "\t" + str(gameElement.size.y)
+	var requirement = gameElement.name + "\t" + str(gameElement.GetSizeX()) + "\t" + str(gameElement.GetSizeY())
 	
 	AddToRequestQueue(url, HTTPClient.METHOD_POST, requirement)
 	
@@ -247,7 +271,7 @@ func _do_Sync():
 	if (m_LastGameElementsHash != GameSession.GameElementsHash):
 		
 		var displayedObjects = $MapScn.GetDisplayableObjects()
-		
+
 		# Check if spawn is required
 		for synced in GameSession.GameElements:
 			var isNotDisplayed = true
@@ -259,10 +283,10 @@ func _do_Sync():
 				if (displayed.name == synced.Identifier):
 					isNotDisplayed = false
 					
-					if (synced.Location[0] != displayed.position.x || synced.Location[1] != displayed.position.y):
+					if (synced.Location[0] != displayed.GetPosX() || synced.Location[1] != displayed.GetPosY()):
 						positionMismatch = true
 					
-					if (synced.Size[0] != displayed.size.x || synced.Size[1] != displayed.size.y):
+					if (synced.Size[0] != displayed.GetSizeX() || synced.Size[1] != displayed.GetSizeY()):
 						sizeMismatch = true
 					
 					break
@@ -281,18 +305,18 @@ func _do_Sync():
 		for displayed in displayedObjects:
 			var isNotInSync = true
 			var positionMismatch = false
-			var sizeMismatch = false
+			#var sizeMismatch = false
 			
 			for synced in GameSession.GameElements:
 				
 				if (displayed.name == synced.Identifier):
 					isNotInSync = false
 					
-					if (synced.Location[0] != displayed.position.x || synced.Location[1] != displayed.position.y):
+					if (synced.Location[0] != displayed.GetPosX() || synced.Location[1] != displayed.GetPosY()):
 						positionMismatch = true
 					
-					if (synced.Size[0] != displayed.size.x || synced.Size[1] != displayed.size.y):
-						sizeMismatch = true
+					#if (synced.Size[0] != displayed.GetSizeX() || synced.Size[1] != displayed.GetSizeY()):
+						#sizeMismatch = true
 					
 					break
 				
@@ -302,8 +326,8 @@ func _do_Sync():
 			if (positionMismatch):
 				$MapScn.UpdateLocation(displayed)
 			
-			if (sizeMismatch):
-				$MapScn.UpdateSize(displayed)
+			#if (sizeMismatch):
+				#$MapScn.UpdateSize(displayed)
 		
 		m_LastGameElementsHash = GameSession.GameElementsHash
 		
@@ -312,26 +336,6 @@ func _do_Sync():
 	m_RequestLock = false
 	
 	pass
-
-
-# Represents the game state synced from the server
-var GameSession = {
-	SessionName = "",
-	BackgroundAsset = "",
-	AssetHash = "",
-	ChatHash = "",
-	GameElementsHash = "",
-	AssetList = [],
-	PlayerList = [],
-	ChatWindowLog = [],
-	GameElements = [{ 
-		Name = "",
-		Owner = "",
-		Identifier = "",
-		Location = [],
-		Size = []
-	 }]
-}
 
 
 # Start server
@@ -389,3 +393,24 @@ func _on_ShowMainMenuClick():
 	$MainMenu.show()
 	
 	pass
+
+
+
+# Represents the game state synced from the server
+var GameSession = {
+	SessionName = "",
+	BackgroundAsset = "",
+	AssetHash = "",
+	ChatHash = "",
+	GameElementsHash = "",
+	AssetList = [],
+	PlayerList = [],
+	ChatWindowLog = [],
+	GameElements = [{ 
+		Name = "",
+		Owner = "",
+		Identifier = "",
+		Location = [],
+		Size = []
+	 }]
+}

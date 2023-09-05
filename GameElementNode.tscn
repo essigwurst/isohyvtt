@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://mkug27qbc3jf"]
+
+[ext_resource type="Script" path="res://content/scripts/GameElementNode.gd" id="1_3mx8j"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_70bli"]
+radius = 2.0
+
+[node name="GameElementNode" type="Area2D"]
+script = ExtResource("1_3mx8j")
+
+[node name="GameElementTexture" type="TextureRect" parent="."]
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="GameElementCollisionShape" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_70bli")

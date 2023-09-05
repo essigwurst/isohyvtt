@@ -11,10 +11,15 @@ var isScalingElement = null
 var isScaling = false
 var isRmbPressed = false
 
-signal UpdateLocationFromClient(gameElement)
-signal UpdateSizeFromClient(gameElement)
-signal RemoveGameElement(gameElement)
-signal PrintInfo(gameElement)
+# Game element node
+var GameElementNode = preload("res://GameElementNode.tscn")
+
+# User interaction signals
+signal update_location_from_client(gameElement)
+signal update_size_from_client(gameElement)
+signal remove_game_element(gameElement)
+signal print_info(gameElement)
+
 
 # Called every frame
 func _process(_delta):
@@ -24,19 +29,20 @@ func _process(_delta):
 		var dx = get_viewport().get_mouse_position().x - lastMousePos[0]
 		var dy = get_viewport().get_mouse_position().y - lastMousePos[1]
 		
-		isDraggingElement.position.x += dx
-		isDraggingElement.position.y += dy
+		isDraggingElement.SetPosX(isDraggingElement.GetPosX() + dx)
+		isDraggingElement.SetPosY(isDraggingElement.GetPosY() + dy)
 		
 		lastMousePos[0] = get_viewport().get_mouse_position().x
 		lastMousePos[1] = get_viewport().get_mouse_position().y
 	
 	if (isScalingElement != null && isScaling):
 		
-		var dx = get_viewport().get_mouse_position().x - lastMousePos[0]
+		# See SetSizeX() function for details
+		#var dx = get_viewport().get_mouse_position().x - lastMousePos[0]
 		var dy = get_viewport().get_mouse_position().y - lastMousePos[1]
 		
-		isScalingElement.size.x += dx
-		isScalingElement.size.y += dy
+		#isScalingElement.SetSizeX(isScalingElement.GetSizeX() + dx)
+		isScalingElement.SetSizeY(isScalingElement.GetSizeY() + dy)
 		
 		lastMousePos[0] = get_viewport().get_mouse_position().x
 		lastMousePos[1] = get_viewport().get_mouse_position().y
@@ -45,9 +51,9 @@ func _process(_delta):
 
 
 # Handles scale & drag and drop options
-func _on_GameElementMouseEvent(inputEvent, gameElement):
+func _on_GameElementMouseEvent(_viewport, inputEvent, _shapeIndex, gameElement):
 	
-	var isDragable = gameElement.editor_description == "isDragable"
+	var isDragable = gameElement.is_dragable
 	
 	if (Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) && isDragable):
 		
@@ -55,12 +61,16 @@ func _on_GameElementMouseEvent(inputEvent, gameElement):
 			lastMousePos[0] = get_viewport().get_mouse_position().x
 			lastMousePos[1] = get_viewport().get_mouse_position().y
 		
+		if (isDraggingElement != gameElement && isDragging):
+			return
+		
 		isDraggingElement = gameElement
+			
 		isDragging = true;
 	
-	elif (!Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) && isDragging && isDragable):
+	if (!Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) && isDragging && isDragable):
 		
-		emit_signal("UpdateLocationFromClient", gameElement)
+		emit_signal("update_location_from_client", gameElement)
 		
 		lastMousePos[0] = 0
 		lastMousePos[1] = 0
@@ -75,12 +85,15 @@ func _on_GameElementMouseEvent(inputEvent, gameElement):
 			lastMousePos[0] = get_viewport().get_mouse_position().x
 			lastMousePos[1] = get_viewport().get_mouse_position().y
 		
+		if (isScalingElement != gameElement && isScaling):
+			return
+		
 		isScalingElement = gameElement
 		isScaling = true
 	
-	elif (!Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE) && isScaling && isDragable):
+	if (!Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE) && isScaling && isDragable):
 		
-		emit_signal("UpdateSizeFromClient", gameElement)
+		emit_signal("update_size_from_client", gameElement)
 		
 		lastMousePos[0] = 0
 		lastMousePos[1] = 0
@@ -96,30 +109,31 @@ func _on_GameElementMouseEvent(inputEvent, gameElement):
 	if (!Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT) && isRmbPressed):
 		
 		isRmbPressed = false
-		
-		# We have only one child node here - and it's the invisible button /w popup menu
-		gameElement.get_child(0).position.x = inputEvent.position.x
-		gameElement.get_child(0).position.y = inputEvent.position.y
-		gameElement.get_child(0).show_popup()
+
+		for child in gameElement.get_children():
+			
+			if (child.name == "InvPopupButton"):
+				
+				child.position.x = inputEvent.position.x - gameElement.GetPosX()
+				child.position.y = inputEvent.position.y - gameElement.GetPosY()
+				child.show_popup()
+				
+				break
 	
 	pass
 
 
 # Updates the size of a game element after a resizing was done by another person
-func UpdateSizeFromServer(gameElement):
+func UpdateSizeFromServer(gameElementStruct):
 	
 	for child in get_children():
 		
-		if (gameElement is TextureRect):
-			if (child.name == gameElement.name):
-				child.size.x = gameElement.size.x
-				child.size.y = gameElement.size.y
-				break
-		else:
-			if (child.name == gameElement.Identifier):
-				child.size.x = gameElement.Size[0]
-				child.size.y = gameElement.Size[1]
-				break
+		if (child.name == gameElementStruct.Identifier):
+			child.SetSizeX(gameElementStruct.Size[0])
+			child.SetSizeY(gameElementStruct.Size[1])
+			
+			break
+		
 	pass
 
 
@@ -147,7 +161,7 @@ func UpdateLocationFromServer(gameElement):
 # Add hover effect
 func _on_AssetMouseOver(gameElement):
 	
-	gameElement.self_modulate = Color.FLORAL_WHITE
+	gameElement.SetSelfModulate(Color.FLORAL_WHITE)
 	
 	pass
 
@@ -155,82 +169,93 @@ func _on_AssetMouseOver(gameElement):
 # Remove hover effect
 func _on_AssetMouseLeave(gameElement):
 	
-	gameElement.self_modulate = Color.WHITE
+	gameElement.SetSelfModulate(Color.WHITE)
 	
 	pass
 
 
 # Handles popup menu events
-func _on_PopupMenuItemClick(id, texNode):
+func _on_PopupMenuItemClick(id, gameElementNode):
 	
-	if (texNode == null):
+	if (gameElementNode == null):
 		return
 	
 	# Layer +
 	if (id == 0):
-		texNode.z_index = texNode.z_index + 1
+		
+		var nodeIndex = gameElementNode.get_index()
+		var nodeCount = get_child_count()
+		var targetIndex = nodeIndex + 1
+		
+		if (targetIndex >= nodeCount):
+			targetIndex = nodeIndex
+			gameElementNode.z_index = gameElementNode.z_index - 1
+		
+		move_child(gameElementNode, targetIndex)
+		gameElementNode.z_index = gameElementNode.z_index + 1
 		
 	# Layer -
 	elif (id == 1):
-		texNode.z_index = texNode.z_index - 1
+		
+		var nodeIndex = gameElementNode.get_index()
+		var targetIndex = nodeIndex - 1
+		
+		if (targetIndex < 0):
+			targetIndex = nodeIndex
+			gameElementNode.z_index = gameElementNode.z_index + 1
+			
+		move_child(gameElementNode, targetIndex)
+	
+		gameElementNode.z_index = gameElementNode.z_index - 1
 	
 	# Prints info to the chat box
-	elif (id == 3):
-		emit_signal("PrintInfo", texNode)
+	elif (id == 2):
+		emit_signal("print_info", gameElementNode)
 		
 	# Delete
 	elif (id == 3):
-		emit_signal("RemoveGameElement", texNode)
+		emit_signal("remove_game_element", gameElementNode)
 	
 	pass
 
 
 # Spawns a new element on the screen
-func SpawnAsset(gameElement):
+func SpawnAsset(gameElementStruct):
 	
 	var targetDir = "user://" + get_parent().GameSession.SessionName
-	var targetAsset = targetDir + "/" + gameElement.Name
-	var image = Image.new()
-	var texNode = TextureRect.new()
+	var targetAsset = targetDir + "/" + gameElementStruct.Name
 	
-	image.load(targetAsset)
+	var gameElement = GameElementNode.instantiate()
 	
-	texNode.name = gameElement.Identifier
-	texNode.texture = ImageTexture.create_from_image(image)
-	texNode.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
-	texNode.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
-	texNode.size.x = gameElement.Size[0]
-	texNode.size.y = gameElement.Size[1]
-	texNode.position.x = gameElement.Location[0]
-	texNode.position.y = gameElement.Location[1]
-	texNode.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	gameElement.Init(gameElementStruct, targetAsset)
 	
-	if (get_parent().m_PlayerName == gameElement.Owner):
-		texNode.editor_description = "isDragable"
-		texNode.connect("mouse_entered", _on_AssetMouseOver.bind(texNode))
-		texNode.connect("mouse_exited", _on_AssetMouseLeave.bind(texNode))
+	if (get_parent().m_PlayerName == gameElementStruct.Owner):
+		gameElement.is_dragable = true
+		gameElement.connect("mouse_entered", _on_AssetMouseOver.bind(gameElement))
+		gameElement.connect("mouse_exited", _on_AssetMouseLeave.bind(gameElement))
 	else:
-		texNode.editor_description = "notDragable"
+		gameElement.is_dragable = false
 	
-	texNode.connect("gui_input", _on_GameElementMouseEvent.bind(texNode))
+	gameElement.connect("input_event", _on_GameElementMouseEvent.bind(gameElement))
 	
 	# Add popup menu - probably there is a better use case?
 	var invisibleButton = MenuButton.new()
+	invisibleButton.name = "InvPopupButton"
 	invisibleButton.get_popup().add_item("Layer +")
 	invisibleButton.get_popup().add_item("Layer -")
-	invisibleButton.get_popup().add_item("Info")
+	invisibleButton.get_popup().add_item("Information")
 	
 	# Add remove function only, if this is the owner of the node
-	if (get_parent().m_PlayerName == gameElement.Owner):
+	if (get_parent().m_PlayerName == gameElementStruct.Owner):
 		invisibleButton.get_popup().add_item("Remove")
 	
-	invisibleButton.get_popup().connect("id_pressed", _on_PopupMenuItemClick.bind(texNode))
+	invisibleButton.get_popup().connect("id_pressed", _on_PopupMenuItemClick.bind(gameElement))
 	invisibleButton.size.x = 1
 	invisibleButton.size.y = 1
 	invisibleButton.visible = false
 	
-	texNode.add_child(invisibleButton, true)
-	self.add_child(texNode, true)
+	gameElement.add_child(invisibleButton, true)
+	self.add_child(gameElement, true)
 
 	pass
 

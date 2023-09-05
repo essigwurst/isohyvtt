@@ -25,8 +25,4 @@
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy &quot;E:\Entwicklung\Godot\IsoHyVtt\server\Essigstudios.IsoHyVttServer\bin\Debug\net7.0\serverexec.*&quot; &quot;E:\Entwicklung\Godot\IsoHyVtt\server\bin\serverexec.*&quot;" />
-  </Target>
-
 </Project>

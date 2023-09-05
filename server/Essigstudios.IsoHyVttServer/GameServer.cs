@@ -194,8 +194,17 @@ namespace Essigstudios.IsoHyVttServer
                     else if (request.RawUrl.Contains($"/{m_ServerName}/addchat?user="))
                     {
                         string user = request.RawUrl.Split("user=").Last().Replace("'", string.Empty);
+                        string chatText = Encoding.UTF8.GetString(requestBody);
 
-                        WriteToChatLog($"[{user} @ {DateTime.Now.ToString("HH:mm:ss")}] " + Encoding.UTF8.GetString(requestBody));
+                        if (chatText.StartsWith('/'))
+                        {
+                            ProcessChatCommand(chatText.Replace("/", string.Empty), user);
+                        }
+                        else
+                        {
+                            WriteToChatLog($"[{user} @ {DateTime.Now.ToString("HH:mm:ss")}] " + chatText);
+                        }
+
                         responseData = Encoding.UTF8.GetBytes("200");
                     }
                     else if (request.RawUrl.Contains($"/{m_ServerName}/spawnasset?user="))
@@ -228,8 +237,8 @@ namespace Essigstudios.IsoHyVttServer
                         string[] requirement = Encoding.UTF8.GetString(requestBody).Split('\t');
 
                         string assetIdentifier = requirement[0];
-                        int newPosX = Convert.ToInt32(requirement[1]);
-                        int newPosY = Convert.ToInt32(requirement[2]);
+                        int newPosX = Convert.ToInt32(requirement[1].Replace(".", ",").Split(',')[0]);
+                        int newPosY = Convert.ToInt32(requirement[2].Replace(".", ",").Split(',')[0]);
 
                         UpdateGameElementLocation(assetIdentifier, newPosX, newPosY);
 
@@ -263,6 +272,18 @@ namespace Essigstudios.IsoHyVttServer
 
                         responseData = Encoding.UTF8.GetBytes("200");
                     }
+                    else if (request.RawUrl.Contains($"/{m_ServerName}/printinfo?user="))
+                    {
+                        string user = request.RawUrl.Split("user=").Last().Replace("'", string.Empty);
+                        string[] requirement = Encoding.UTF8.GetString(requestBody).Split('\t');
+
+                        string assetIdentifier = requirement[0];
+
+                        WriteToChatLog($"Asset info for {user}: {assetIdentifier}");
+
+                        responseData = Encoding.UTF8.GetBytes("200");
+                    }
+
 
                     if (responseData != null)
                     {
@@ -305,6 +326,44 @@ namespace Essigstudios.IsoHyVttServer
                 return memoryStream.ToArray();
             }
         }
+
+
+        /// <summary>
+        /// Processes a chat command (messages starting with "/")
+        /// </summary>
+        /// <param name="command">Command without /</param>
+        private void ProcessChatCommand(string command, string user)
+        {
+            // Removes all elements from the game
+            if (command == "reset")
+            {
+                WriteToChatLog($"Session was reset by {user}!");
+
+                m_Session.GameElements.Clear();
+
+                GenerateGameElementHash();
+            }
+            // Sets the size of an asset
+            else if (command.StartsWith("size"))
+            {
+                try
+                {
+                    string[] cmd = command.Split(' ');
+
+                    int x = Convert.ToInt32(cmd[2]);
+                    int y = Convert.ToInt32(cmd[3]);
+
+                    UpdateGameElementSize(cmd[1], x, y);
+
+                    WriteToChatLog($"Size set!");
+                }
+                catch
+                {
+                    WriteToChatLog($"Invalid command!");
+                }
+            }
+        }
+
 
 
         /// <summary>
