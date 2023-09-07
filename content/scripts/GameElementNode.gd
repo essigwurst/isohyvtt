@@ -23,13 +23,15 @@ extends Area2D
 var aspect_ratio_x = 1.0
 var aspect_ratio_y = 1.0
 
+
 # Assigns the values to the existing structures
 func Init(gameElementStruct, targetAsset):
-	
+
 	var image = Image.new()	
 	image.load(targetAsset)
 	
 	name = gameElementStruct.Identifier
+	z_index = gameElementStruct.Layer
 	position.x = gameElementStruct.Location[0]
 	position.y = gameElementStruct.Location[1]
 	
@@ -151,3 +153,9 @@ func GetSizeY():
 	var textureSizeY = int($GameElementTexture.size.y)
 	
 	return (textureSizeY)
+
+
+# Returns the z_index aka layer of this object
+func GetLayer():
+	
+	return (z_index)

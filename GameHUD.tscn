@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://njsujtljoo5q"]
+[gd_scene load_steps=5 format=3 uid="uid://njsujtljoo5q"]
 
 [ext_resource type="Script" path="res://content/scripts/GameHUD.gd" id="1_kvj0f"]
 [ext_resource type="Texture2D" uid="uid://bmce5in4pu4ai" path="res://content/graphics/icon.png" id="2_hbuh0"]
 [ext_resource type="PackedScene" uid="uid://bpgtke26ub8cm" path="res://DiceMenu.tscn" id="2_jk70g"]
+[ext_resource type="FontFile" uid="uid://b3026fpukqwge" path="res://content/fonts/Flexi_IBM_VGA_True_437.ttf" id="4_cbp01"]
 
 [node name="GameHUD" type="Node2D"]
 visibility_layer = 512
@@ -31,6 +32,7 @@ offset_left = 1480.0
 offset_top = 832.0
 offset_right = 1576.0
 offset_bottom = 880.0
+theme_override_fonts/font = ExtResource("4_cbp01")
 theme_override_font_sizes/font_size = 20
 text = "Upload
 asset"
@@ -41,6 +43,7 @@ offset_left = 1480.0
 offset_top = 16.0
 offset_right = 1576.0
 offset_bottom = 64.0
+theme_override_fonts/font = ExtResource("4_cbp01")
 theme_override_font_sizes/font_size = 20
 text = "Leave
 game"
@@ -51,6 +54,7 @@ offset_left = 24.0
 offset_top = 640.0
 offset_right = 120.0
 offset_bottom = 688.0
+theme_override_fonts/font = ExtResource("4_cbp01")
 theme_override_font_sizes/font_size = 20
 text = "Roll"
 
@@ -60,6 +64,7 @@ offset_left = 24.0
 offset_top = 704.0
 offset_right = 448.0
 offset_bottom = 832.0
+theme_override_fonts/font = ExtResource("4_cbp01")
 editable = false
 scroll_smooth = true
 
@@ -69,6 +74,7 @@ offset_left = 24.0
 offset_top = 848.0
 offset_right = 448.0
 offset_bottom = 880.0
+theme_override_fonts/font = ExtResource("4_cbp01")
 theme_override_font_sizes/font_size = 20
 
 [node name="LocalAssetSelectionDialog" type="FileDialog" parent="."]
@@ -80,22 +86,22 @@ dialog_hide_on_ok = true
 file_mode = 1
 access = 2
 
-[node name="ResetTextTimer" type="Timer" parent="."]
-wait_time = 0.05
-one_shot = true
-
 [node name="AssetScrollContainer" type="ScrollContainer" parent="."]
 texture_filter = 1
 offset_left = 1480.0
-offset_top = 80.0
+offset_top = 96.0
 offset_right = 1576.0
-offset_bottom = 816.0
+offset_bottom = 800.0
 
 [node name="AssetListContainer" type="VBoxContainer" parent="AssetScrollContainer"]
 texture_filter = 1
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 alignment = 1
+
+[node name="ResetTextTimer" type="Timer" parent="."]
+wait_time = 0.1
+one_shot = true
 
 [node name="SpawnBlockTimer" type="Timer" parent="."]
 wait_time = 0.15

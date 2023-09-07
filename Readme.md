@@ -22,9 +22,7 @@ want to self- host their tabletop game.
 ## Open topics
 
 - Replace HTTP Listener by a TCP socket (This was originally written for testing purposes only)
-- GameHUD layering (You can't click on asset objects when there is an game element behind it)
-- Implement layering on server side
-- Input lag when scaling or moving objects which do overlap
+- Selection problems when game elements do overlap
 - Full map zoom and drag and drop
 - Dynamic health bars (the TextureRect's was replaced by GameElementNodes to be able to add subnodes more efficently)
 

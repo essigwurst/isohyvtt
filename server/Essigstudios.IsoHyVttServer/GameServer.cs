@@ -213,10 +213,11 @@ namespace Essigstudios.IsoHyVttServer
                         string[] requirement = Encoding.UTF8.GetString(requestBody).Split('\t');
 
                         string assetName = requirement[0];
-                        int windowX = Convert.ToInt32(requirement[1]);
-                        int windowY = Convert.ToInt32(requirement[2]);
+                        int spawnX = (int)Math.Round(Convert.ToSingle(requirement[1]) / 2.0f, 0, MidpointRounding.AwayFromZero);
+                        int spawnY = (int)Math.Round(Convert.ToSingle(requirement[2]) / 2.0f, 0, MidpointRounding.AwayFromZero);
+                        int layer = Convert.ToInt32(requirement[3]);
 
-                        string id = AddGameElement(assetName, user, windowX, windowY);
+                        string id = AddGameElement(assetName, user, spawnX, spawnY, layer);
 
                         responseData = Encoding.UTF8.GetBytes(id);
                     }
@@ -283,7 +284,18 @@ namespace Essigstudios.IsoHyVttServer
 
                         responseData = Encoding.UTF8.GetBytes("200");
                     }
+                    else if (request.RawUrl.Contains($"/{m_ServerName}/setlayer?user="))
+                    {
+                        string user = request.RawUrl.Split("user=").Last().Replace("'", string.Empty);
+                        string[] requirement = Encoding.UTF8.GetString(requestBody).Split('\t');
 
+                        string assetIdentifier = requirement[0];
+                        int targetLayer = Convert.ToInt32(requirement[1]);
+
+                        SetTargetLayer(assetIdentifier, targetLayer);
+
+                        responseData = Encoding.UTF8.GetBytes("200");
+                    }
 
                     if (responseData != null)
                     {
@@ -441,7 +453,7 @@ namespace Essigstudios.IsoHyVttServer
         /// <param name="windowX">Viewport width, used to determine the spawn position (center screen)</param>
         /// <param name="windowY">Viewport height, used to determine the spawn position (center screen)</param>
         /// <returns>Asset identifier, e.g. test_png1</returns>
-        private string AddGameElement(string assetName, string owner, int windowX, int windowY)
+        private string AddGameElement(string assetName, string owner, int spawnX, int spawnY, int layer)
         {
             var asset = Path.Combine(m_WebRoot, m_ServerName, assetName);
 
@@ -451,13 +463,7 @@ namespace Essigstudios.IsoHyVttServer
                 return (string.Empty);
             }
 
-            float[] spawnLocation = new float[]
-            {
-                windowX / 2.0f,
-                windowY / 2.0f
-            };
-
-            // ToDo: Make it cross- platform compatible.
+            // ToDo: This function is only available on windows!
             var image = Image.FromFile(asset);
 
             int highestId = 0;
@@ -477,7 +483,7 @@ namespace Essigstudios.IsoHyVttServer
             var id = highestId + 1;
             string identifier = (assetName + id).Replace(".", "_");
 
-            GameElement element = new GameElement(assetName, identifier, owner, spawnLocation, new float[] { (float)image.Width, (float)image.Height } );
+            GameElement element = new GameElement(assetName, identifier, owner, new int[] { spawnX, spawnY }, new int[] { image.Width, image.Height }, layer);
             m_Session.GameElements.Add(element);
 
             image.Dispose();
@@ -531,6 +537,27 @@ namespace Essigstudios.IsoHyVttServer
 
 
         /// <summary>
+        /// Sets the target layer for a specific asset
+        /// </summary>
+        /// <param name="assetIdentifier"></param>
+        /// <param name="targetLayer"></param>
+        private void SetTargetLayer(string assetIdentifier, int targetLayer)
+        {
+            foreach (var gameElement in m_Session.GameElements)
+            {
+                if (gameElement.Identifier.Replace(".", "_") == assetIdentifier)
+                {
+                    gameElement.Layer = targetLayer;
+
+                    GenerateGameElementHash();
+
+                    break;
+                }
+            }
+        }
+
+
+        /// <summary>
         /// Generates a hash out of all uploaded assets.
         /// Used by the client to determine, if anything has been changed
         /// </summary>
@@ -560,7 +587,7 @@ namespace Essigstudios.IsoHyVttServer
 
             foreach (var asset in m_Session.GameElements)
             {
-                buffer += asset.Identifier + asset.Owner + asset.Location[0].ToString() + asset.Location[1].ToString();
+                buffer += asset.Identifier + asset.Owner + asset.Location[0].ToString() + "_" + asset.Location[1].ToString() + "/" + asset.Size[0].ToString() + "_" + asset.Size[1].ToString() + "/" + asset.Layer.ToString();
             }
 
             MD5 hash = MD5.Create();

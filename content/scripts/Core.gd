@@ -35,9 +35,21 @@ func _ready():
 	pass
 
 
+# Adds a new request to the server queue
 func AddToRequestQueue(url, httpMethod, content):
 	
 	m_RequestQueue.append([ url, httpMethod, content ])
+	pass
+
+
+# Sets the target layer of an game element
+func _on_SetTargetLayer(gameElementNode):
+	
+	var url = m_ServerPath + "/setlayer?user='" + m_PlayerName + "'"
+	var requirement = gameElementNode.name + "\t" + str(gameElementNode.z_index)
+	
+	AddToRequestQueue(url, HTTPClient.METHOD_POST, requirement)
+	
 	pass
 
 
@@ -94,7 +106,8 @@ func _on_UpdateSizeFromClient(gameElement):
 func _on_SpawnNewAsset(assetName):
 	
 	var url = m_ServerPath + "/spawnasset?user='" + m_PlayerName + "'"
-	var requirement = assetName + "\t" + str(get_viewport().size.x) + "\t" + str(get_viewport().size.y)
+	var initialSpawnLayer = 10
+	var requirement = assetName + "\t" + str(get_viewport().size.x) + "\t" + str(get_viewport().size.y) + "\t" + str(initialSpawnLayer)
 	
 	AddToRequestQueue(url, HTTPClient.METHOD_POST, requirement)
 	
@@ -221,6 +234,7 @@ func _do_Sync():
 	gameSession.parse(response[3].get_string_from_utf8(), true)
 	GameSession = JSON.parse_string(gameSession.get_parsed_text())
 	
+	# Check, if one or more assets have been uploaded
 	if (m_LastAssetHash != GameSession.AssetHash):
 		
 		for asset in GameSession.AssetList:
@@ -263,20 +277,23 @@ func _do_Sync():
 		
 		m_LastAssetHash = GameSession.AssetHash
 	
+	# Check, if there was a chat message appended
 	if (m_LastChatHash != GameSession.ChatHash):
 		
 		$GameHUD.SetChatTextArray(GameSession.ChatWindowLog)
 		m_LastChatHash = GameSession.ChatHash
 	
+	# Check, if some game elemnts has been moved or resized
 	if (m_LastGameElementsHash != GameSession.GameElementsHash):
 		
 		var displayedObjects = $MapScn.GetDisplayableObjects()
 
-		# Check if spawn is required
+		# Check if spawn, size or location update is required
 		for synced in GameSession.GameElements:
 			var isNotDisplayed = true
 			var positionMismatch = false
 			var sizeMismatch = false
+			var layerMismatch = false
 			
 			for displayed in displayedObjects:
 				
@@ -289,6 +306,9 @@ func _do_Sync():
 					if (synced.Size[0] != displayed.GetSizeX() || synced.Size[1] != displayed.GetSizeY()):
 						sizeMismatch = true
 					
+					if (synced.Layer != displayed.GetLayer()):
+						layerMismatch = true
+					
 					break
 				
 			if (isNotDisplayed):
@@ -299,35 +319,24 @@ func _do_Sync():
 			
 			if (sizeMismatch):
 				$MapScn.UpdateSizeFromServer(synced)
+			
+			if (layerMismatch):
+				$MapScn.UpdateLayerFromServer(synced)
 		
 		
 		# Check if despawn required
 		for displayed in displayedObjects:
 			var isNotInSync = true
-			var positionMismatch = false
-			#var sizeMismatch = false
 			
 			for synced in GameSession.GameElements:
 				
 				if (displayed.name == synced.Identifier):
 					isNotInSync = false
 					
-					if (synced.Location[0] != displayed.GetPosX() || synced.Location[1] != displayed.GetPosY()):
-						positionMismatch = true
-					
-					#if (synced.Size[0] != displayed.GetSizeX() || synced.Size[1] != displayed.GetSizeY()):
-						#sizeMismatch = true
-					
 					break
 				
 			if (isNotInSync):
 				$MapScn.DespawnAsset(displayed)
-			
-			if (positionMismatch):
-				$MapScn.UpdateLocation(displayed)
-			
-			#if (sizeMismatch):
-				#$MapScn.UpdateSize(displayed)
 		
 		m_LastGameElementsHash = GameSession.GameElementsHash
 		
@@ -411,6 +420,7 @@ var GameSession = {
 		Owner = "",
 		Identifier = "",
 		Location = [],
-		Size = []
+		Size = [],
+		Layer = 0
 	 }]
 }

@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://c84i3dk2h5jay"]
+[gd_scene load_steps=4 format=3 uid="uid://c84i3dk2h5jay"]
 
 [ext_resource type="Script" path="res://content/scripts/JoinMenu.gd" id="1_o8mp1"]
 [ext_resource type="Texture2D" uid="uid://bmce5in4pu4ai" path="res://content/graphics/icon.png" id="2_mu5t2"]
+[ext_resource type="FontFile" uid="uid://b3026fpukqwge" path="res://content/fonts/Flexi_IBM_VGA_True_437.ttf" id="3_x58cl"]
 
 [node name="JoinMenu" type="Node2D"]
 script = ExtResource("1_o8mp1")
@@ -15,11 +16,13 @@ offset_bottom = 548.0
 texture = ExtResource("2_mu5t2")
 
 [node name="JoinLabel" type="Label" parent="."]
+texture_filter = 1
 offset_left = 616.0
 offset_top = 392.0
 offset_right = 994.0
 offset_bottom = 495.0
 rotation = -0.523599
+theme_override_fonts/font = ExtResource("3_x58cl")
 theme_override_font_sizes/font_size = 100
 text = "Join Game"
 metadata/_edit_use_anchors_ = true
@@ -30,6 +33,7 @@ offset_left = 832.0
 offset_top = 704.0
 offset_right = 1024.0
 offset_bottom = 752.0
+theme_override_fonts/font = ExtResource("3_x58cl")
 theme_override_font_sizes/font_size = 35
 text = "Join"
 
@@ -39,6 +43,7 @@ offset_left = 768.0
 offset_top = 557.0
 offset_right = 1024.0
 offset_bottom = 605.0
+theme_override_fonts/font = ExtResource("3_x58cl")
 theme_override_font_sizes/font_size = 35
 
 [node name="PlayerNameLabel" type="Label" parent="."]
@@ -47,6 +52,7 @@ offset_left = 576.0
 offset_top = 565.0
 offset_right = 756.0
 offset_bottom = 604.0
+theme_override_fonts/font = ExtResource("3_x58cl")
 theme_override_font_sizes/font_size = 35
 text = "Player name:"
 
@@ -56,6 +62,7 @@ offset_left = 576.0
 offset_top = 704.0
 offset_right = 768.0
 offset_bottom = 752.0
+theme_override_fonts/font = ExtResource("3_x58cl")
 theme_override_font_sizes/font_size = 35
 text = "Back"
 
@@ -65,6 +72,7 @@ offset_left = 576.0
 offset_top = 632.0
 offset_right = 756.0
 offset_bottom = 671.0
+theme_override_fonts/font = ExtResource("3_x58cl")
 theme_override_font_sizes/font_size = 35
 text = "Server:"
 
@@ -74,6 +82,7 @@ offset_left = 768.0
 offset_top = 624.0
 offset_right = 1024.0
 offset_bottom = 672.0
+theme_override_fonts/font = ExtResource("3_x58cl")
 theme_override_font_sizes/font_size = 35
 
 [connection signal="pressed" from="JoinServerButton" to="." method="_on_JoinButton_pressed"]

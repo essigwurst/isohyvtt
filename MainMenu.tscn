@@ -38,6 +38,7 @@ offset_left = 704.0
 offset_top = 592.0
 offset_right = 896.0
 offset_bottom = 640.0
+theme_override_fonts/font = ExtResource("1_pb23i")
 theme_override_font_sizes/font_size = 35
 text = "Host Game"
 
@@ -47,6 +48,7 @@ offset_left = 704.0
 offset_top = 656.0
 offset_right = 896.0
 offset_bottom = 704.0
+theme_override_fonts/font = ExtResource("1_pb23i")
 theme_override_font_sizes/font_size = 35
 text = "Join Game"
 
@@ -56,6 +58,7 @@ offset_left = 704.0
 offset_top = 720.0
 offset_right = 896.0
 offset_bottom = 768.0
+theme_override_fonts/font = ExtResource("1_pb23i")
 theme_override_font_sizes/font_size = 35
 text = "Exit Game"
 

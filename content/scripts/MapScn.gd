@@ -4,12 +4,13 @@ extends Node
 
 
 # Game element scale & drag and drop variables
-var isDraggingElement = null
 var lastMousePos = [ 1, 1 ]
 var isDragging = false
-var isScalingElement = null
 var isScaling = false
 var isRmbPressed = false
+var lastHoveredGameElement = null
+var m_HoverStack = []
+var m_PopupLock = false
 
 # Game element node
 var GameElementNode = preload("res://GameElementNode.tscn")
@@ -19,30 +20,31 @@ signal update_location_from_client(gameElement)
 signal update_size_from_client(gameElement)
 signal remove_game_element(gameElement)
 signal print_info(gameElement)
+signal set_layer(gameElement)
 
 
 # Called every frame
 func _process(_delta):
 	
-	if (isDraggingElement != null && isDragging):
+	if (lastHoveredGameElement != null && isDragging):
 		
 		var dx = get_viewport().get_mouse_position().x - lastMousePos[0]
 		var dy = get_viewport().get_mouse_position().y - lastMousePos[1]
 		
-		isDraggingElement.SetPosX(isDraggingElement.GetPosX() + dx)
-		isDraggingElement.SetPosY(isDraggingElement.GetPosY() + dy)
+		lastHoveredGameElement.SetPosX(lastHoveredGameElement.GetPosX() + dx)
+		lastHoveredGameElement.SetPosY(lastHoveredGameElement.GetPosY() + dy)
 		
 		lastMousePos[0] = get_viewport().get_mouse_position().x
 		lastMousePos[1] = get_viewport().get_mouse_position().y
 	
-	if (isScalingElement != null && isScaling):
+	if (lastHoveredGameElement != null && isScaling):
 		
 		# See SetSizeX() function for details
 		#var dx = get_viewport().get_mouse_position().x - lastMousePos[0]
 		var dy = get_viewport().get_mouse_position().y - lastMousePos[1]
 		
-		#isScalingElement.SetSizeX(isScalingElement.GetSizeX() + dx)
-		isScalingElement.SetSizeY(isScalingElement.GetSizeY() + dy)
+		#lastHoveredGameElement.SetSizeX(isScalingElement.GetSizeX() + dx)
+		lastHoveredGameElement.SetSizeY(lastHoveredGameElement.GetSizeY() + dy)
 		
 		lastMousePos[0] = get_viewport().get_mouse_position().x
 		lastMousePos[1] = get_viewport().get_mouse_position().y
@@ -61,22 +63,24 @@ func _on_GameElementMouseEvent(_viewport, inputEvent, _shapeIndex, gameElement):
 			lastMousePos[0] = get_viewport().get_mouse_position().x
 			lastMousePos[1] = get_viewport().get_mouse_position().y
 		
-		if (isDraggingElement != gameElement && isDragging):
+		if (lastHoveredGameElement != gameElement && isDragging):
 			return
-		
-		isDraggingElement = gameElement
 			
 		isDragging = true;
 	
 	if (!Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) && isDragging && isDragable):
 		
-		emit_signal("update_location_from_client", gameElement)
+		if (m_PopupLock):
+			m_PopupLock = false
 		
-		lastMousePos[0] = 0
-		lastMousePos[1] = 0
-		
-		isDraggingElement = null
-		isDragging = false
+		if (lastHoveredGameElement != null):
+			
+			emit_signal("update_location_from_client", lastHoveredGameElement)
+			
+			lastMousePos[0] = 0
+			lastMousePos[1] = 0
+			
+			isDragging = false
 	
 	
 	if (Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE) && isDragable):
@@ -85,21 +89,21 @@ func _on_GameElementMouseEvent(_viewport, inputEvent, _shapeIndex, gameElement):
 			lastMousePos[0] = get_viewport().get_mouse_position().x
 			lastMousePos[1] = get_viewport().get_mouse_position().y
 		
-		if (isScalingElement != gameElement && isScaling):
+		if (lastHoveredGameElement != gameElement && isScaling):
 			return
 		
-		isScalingElement = gameElement
 		isScaling = true
 	
 	if (!Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE) && isScaling && isDragable):
 		
-		emit_signal("update_size_from_client", gameElement)
+		if (lastHoveredGameElement != null):
 		
-		lastMousePos[0] = 0
-		lastMousePos[1] = 0
-		
-		isScalingElement = null
-		isScaling = false
+			emit_signal("update_size_from_client", lastHoveredGameElement)
+			
+			lastMousePos[0] = 0
+			lastMousePos[1] = 0
+			
+			isScaling = false
 	
 	
 	if (Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)):
@@ -113,6 +117,8 @@ func _on_GameElementMouseEvent(_viewport, inputEvent, _shapeIndex, gameElement):
 		for child in gameElement.get_children():
 			
 			if (child.name == "InvPopupButton"):
+				
+				m_PopupLock = true
 				
 				child.position.x = inputEvent.position.x - gameElement.GetPosX()
 				child.position.y = inputEvent.position.y - gameElement.GetPosY()
@@ -161,23 +167,57 @@ func UpdateLocationFromServer(gameElement):
 # Add hover effect
 func _on_AssetMouseOver(gameElement):
 	
-	gameElement.SetSelfModulate(Color.FLORAL_WHITE)
+	if (isDragging || isScaling || m_PopupLock):
+		return
 	
+	for item in m_HoverStack:
+		if (item == gameElement):
+			m_HoverStack.erase(item)
+		
+	m_HoverStack.append(gameElement)
+	
+	var targetNode = m_HoverStack[m_HoverStack.size() - 1]
+	targetNode.SetSelfModulate(Color.FLORAL_WHITE)
+	
+	lastHoveredGameElement = targetNode
+		
 	pass
 
 
 # Remove hover effect
 func _on_AssetMouseLeave(gameElement):
 	
-	gameElement.SetSelfModulate(Color.WHITE)
+	if (isDragging  || isScaling || m_PopupLock ||  m_HoverStack.size() == 0):
+		return
 	
+	var targetNode = m_HoverStack[m_HoverStack.size() - 1]
+	targetNode.SetSelfModulate(Color.WHITE)
+	
+	for item in m_HoverStack:
+		if (item == gameElement):
+			m_HoverStack.erase(gameElement)
+			print("ER2 " + gameElement.name)
+			
+	print("SUB " + gameElement.name)
+	
+	if (m_HoverStack.size() > 0):
+		lastHoveredGameElement = m_HoverStack[m_HoverStack.size() - 1]
+		print("SEL " + lastHoveredGameElement.name)
+		
+	else:
+		lastHoveredGameElement = null
+		print("SEL " + "NULL")
+		
 	pass
 
 
 # Handles popup menu events
-func _on_PopupMenuItemClick(id, gameElementNode):
+func _on_PopupMenuItemClick(id, DEPRECATED_gameElement):
+	
+	var gameElementNode = lastHoveredGameElement
 	
 	if (gameElementNode == null):
+		m_PopupLock = false
 		return
 	
 	# Layer +
@@ -194,6 +234,8 @@ func _on_PopupMenuItemClick(id, gameElementNode):
 		move_child(gameElementNode, targetIndex)
 		gameElementNode.z_index = gameElementNode.z_index + 1
 		
+		emit_signal("set_layer", gameElementNode)
+		
 	# Layer -
 	elif (id == 1):
 		
@@ -207,6 +249,8 @@ func _on_PopupMenuItemClick(id, gameElementNode):
 		move_child(gameElementNode, targetIndex)
 	
 		gameElementNode.z_index = gameElementNode.z_index - 1
+		
+		emit_signal("set_layer", gameElementNode)
 	
 	# Prints info to the chat box
 	elif (id == 2):
@@ -215,6 +259,22 @@ func _on_PopupMenuItemClick(id, gameElementNode):
 	# Delete
 	elif (id == 3):
 		emit_signal("remove_game_element", gameElementNode)
+	
+	m_PopupLock = false
+	
+	pass
+
+
+# Handles a layer refresh by an object
+func UpdateLayerFromServer(gameElementStruct):
+	
+	var children = get_children()
+	
+	for child in children:
+		if (child.name == gameElementStruct.Identifier):
+			child.z_index = gameElementStruct.Layer
+			
+			break
 	
 	pass
 

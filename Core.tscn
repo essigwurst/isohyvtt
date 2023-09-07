@@ -10,6 +10,9 @@
 [node name="Core" type="Node"]
 script = ExtResource("1_i2gum")
 
+[node name="MapScn" parent="." instance=ExtResource("6_njr5n")]
+metadata/_edit_group_ = true
+
 [node name="MainMenu" parent="." instance=ExtResource("1_15alo")]
 metadata/_edit_group_ = true
 
@@ -26,14 +29,16 @@ visible = false
 top_level = true
 metadata/_edit_group_ = true
 
-[node name="MapScn" parent="." instance=ExtResource("6_njr5n")]
-metadata/_edit_group_ = true
-
 [node name="ServerConnector" type="HTTPRequest" parent="."]
 
 [node name="SyncTimer" type="Timer" parent="."]
 wait_time = 0.333
 
+[connection signal="print_info" from="MapScn" to="." method="_on_PrintInformation"]
+[connection signal="remove_game_element" from="MapScn" to="." method="_on_RemoveElementFromServer"]
+[connection signal="set_layer" from="MapScn" to="." method="_on_SetTargetLayer"]
+[connection signal="update_location_from_client" from="MapScn" to="." method="_on_UpdateLocationFromClient"]
+[connection signal="update_size_from_client" from="MapScn" to="." method="_on_UpdateSizeFromClient"]
 [connection signal="host_menu" from="MainMenu" to="." method="_on_HostMenuClick"]
 [connection signal="join_menu" from="MainMenu" to="." method="_on_JoinMenuClick"]
 [connection signal="main_menu" from="HostMenu" to="." method="_on_ShowMainMenuClick"]
@@ -45,8 +50,4 @@ wait_time = 0.333
 [connection signal="spawn_asset" from="GameHUD" to="." method="_on_SpawnNewAsset"]
 [connection signal="upload_assets" from="GameHUD" to="." method="_on_UploadAssets"]
 [connection signal="write_chat_message" from="GameHUD" to="." method="_on_WriteChat"]
-[connection signal="print_info" from="MapScn" to="." method="_on_PrintInformation"]
-[connection signal="remove_game_element" from="MapScn" to="." method="_on_RemoveElementFromServer"]
-[connection signal="update_location_from_client" from="MapScn" to="." method="_on_UpdateLocationFromClient"]
-[connection signal="update_size_from_client" from="MapScn" to="." method="_on_UpdateSizeFromClient"]
 [connection signal="timeout" from="SyncTimer" to="." method="_do_Sync"]
